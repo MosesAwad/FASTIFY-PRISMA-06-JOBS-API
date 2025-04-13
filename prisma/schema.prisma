@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String @id @default(uuid())
+  name     String
+  email    String
+  password String
+  jobs     Job[] // Relation field for Prisma, won't add jobs as a column to users table; but helps it with querying
+
+  @@map("users")  // <-- This controls the actual table name
+  @@unique([email])
+  @@index([email])
+}
+
+model Job {
+  id         String    @id @default(uuid())
+  role       String
+  company    String
+  status     JobStatus @default(pending)
+  user       User      @relation(fields: [created_by], references: [id], onDelete: Cascade) // Just a relation field (does not create a column
+  created_by String // The actual foreign key column (which appears in the SQL table) that stores the user's id (user to which the job belongs to)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+   @@map("jobs")  // <-- This controls the actual table name
+}
+
+enum JobStatus {
+  pending
+  interview
+  declined
+}
+
+/**
+ * Prisma's migration system is database-agnostic, so it doesn't optimize for SQLite-specific features like CHECK.
+ * They prioritize PostgreSQL/MySQL where VARCHAR(50) works natively.
+ * So what's VarChar?
+ * VarChar = "Variable Character". It’s a type of string that allocates only the space needed (unlike Char, which pads shorter strings with spaces).
+ * ==========================================================================================================================================================
+ * Example:
+ * name String @db.VarChar(50) → "Alex" (4 chars) uses 4 bytes, not 50.
+ * The Number in Parentheses ((50))
+ * Maximum allowed length for the string.
+ * If you try to insert a 60-character name:
+ * ✅ PostgreSQL/MySQL: Throws an error.
+ * ==========================================================================================================================================================
+ * SQLite enforces length limits through the CHECK keyword instead but since Prisma, and ignores VarChar. But unfortunately, Prisma only implements VarChar
+ * and not CHECK. As such, if you are bound to SQLite and Prisma, you should opt for using independent Schema based validations, like Zod or Fastify's request/
+ * response schema validators which can be passed as options to routes.
+ */
