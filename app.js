@@ -11,13 +11,12 @@ const User = require('./models/User')
 
 const start = async () => {
     try {
-        // 1. DELETE DB CONNECTION AND TABLE INIT
+        // 1. NO NEED FOR DB CONNECTION, TABLE INIT, OR JOB MODEL
         const userModel = new User()
-        // const jobModel = new Job(prisma)
 
         // 2. Register routes (unchanged)
         fastify.register(authRoutes, { userModel, prisma })
-        // fastify.register(jobRoutes, { jobModel })
+        fastify.register(jobRoutes, { prisma })
 
         // 3. Start server (unchanged)
         await fastify.listen({ port: 3000 })

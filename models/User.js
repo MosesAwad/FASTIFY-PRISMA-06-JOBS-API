@@ -4,9 +4,7 @@ const { StatusCodes } = require('http-status-codes');
 const jwt = require('jsonwebtoken');
 
 class User {
-    // constructor(prisma) {  // Accept prisma as dependency
-    //     this.prisma = prisma
-    // }
+    // Remove constructor(db) (Prisma instance is instead passed into the Fastify routes as an instance)
 
     // Remove initTable() (Prisma handles migrations)
 
@@ -14,7 +12,7 @@ class User {
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(password, salt)
         return hashedPassword
-      }
+    }
 
     async comparePassword(candidatePassword, userPassword) {
         const isMatch = await bcrypt.compare(candidatePassword, userPassword);

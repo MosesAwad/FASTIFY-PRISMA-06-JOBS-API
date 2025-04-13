@@ -3,7 +3,7 @@ const authPlugin = require('../plugins/authentication');
 const { createJobOpts, updateJobOpts } = require('../schemas/jobSchemas');
 
 async function jobRoutes(fastify, options) {
-    const { jobModel } = options;
+    const { prisma } = options;
 	const { 
 		getAllJobs, 
 		getJob, 
@@ -11,7 +11,7 @@ async function jobRoutes(fastify, options) {
 		deleteJob, 
 		updateJob, 
 		errorHandler 
-	} = require('../controllers/jobController')(jobModel)
+	} = require('../controllers/jobController')(prisma)
 
 	// Register auth plugin
 	fastify.register(authPlugin);

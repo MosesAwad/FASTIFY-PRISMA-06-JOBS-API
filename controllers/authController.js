@@ -27,21 +27,16 @@ module.exports = (userModel, prisma) => ({		// Note 1
 		},
 	errorHandler:
 		(err, request, reply) => {
+			console.log(err);
 			let customError = {
 				statusCode: err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
 				msg: err.message || 'Something went wrong, try again later',
 			};
 
-			// // Handle SQLite UNIQUE constraint violation
-			// if (err.code === 'SQLITE_CONSTRAINT') {
-			// 	customError.statusCode = StatusCodes.BAD_REQUEST;
-			// 	if (err.message.includes('UNIQUE constraint failed')) {
-			// 		const field = err.message.split(':').pop()?.trim(); // Note 1
-			// 		customError.msg = `Duplicate value for field: ${field}`;
-			// 	} else {
-			// 		customError.msg = 'Database constraint violation';
-			// 	}
-			// }
+			if (err.code && err.code === 'P2002') {
+				customError.statusCode = StatusCodes.BAD_REQUEST
+    			customError.msg = `Duplicate value entered for the ${err.meta.target.join(',')} field(s). Please choose another value`
+			}
 			reply.status(customError.statusCode).send({ error: customError.msg });
 		}
 });
